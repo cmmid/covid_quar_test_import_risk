@@ -1,0 +1,3 @@
+[submodule "covid_imported_cases"]
+	path = covid_imported_cases
+	url = git@github.com:thimotei/covid_imported_cases.git

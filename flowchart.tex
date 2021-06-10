@@ -1,0 +1,100 @@
+% Flowchart
+% Author: Stefan Kottwitz
+% https://www.packtpub.com/hardware-and-creative/latex-cookbook
+\documentclass[border=20pt]{standalone} 
+%%%<
+\usepackage{tikz}
+\pgfdeclarelayer{background}
+\pgfsetlayers{background,main}
+\usetikzlibrary{shapes.geometric, arrows}
+\usepackage[default]{lato}
+\usepackage{xcolor}
+\definecolor{Orange}{HTML}{fdcdac}
+\definecolor{Green}{HTML}{b3e2cd}
+\definecolor{Blue}{HTML}{cbd5e8}
+\definecolor{Red}{HTML}{f4cae4}
+
+\begin{document}
+
+\tikzstyle{startstop} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm,text centered, draw=none, fill=Green]
+\tikzstyle{test} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=none, fill=Blue]
+
+\tikzstyle{place} = [rectangle, rounded corners, minimum width=3cm, minimum height=1cm, text centered, draw=none, fill=Orange]
+
+\tikzstyle{arrow} = [thick,->,>=stealth, align = center, text width = 3cm]
+
+\begin{tikzpicture}[node distance=4.5cm, text width = 3cm, scale = 2]
+\node (start) [startstop] {Intending to fly};
+
+\node (testpre) [test, right of=start] {Pre-flight test};
+\draw [arrow] (start) -- (testpre);
+
+\node (testnopre) [test, below of=testpre, yshift = 2.25cm] {No test};
+\draw [arrow] (start) |- (testnopre);
+\node (dnt) [startstop, above of=testpre, yshift = -2.25cm] {Prevented from travelling};
+
+\node (flight) [place, right of=testpre, fill = Red] {Flight};
+\draw [arrow] (testnopre) -| (flight);
+\draw [arrow] (testpre) -- node[anchor=north, align = center] {Neg.} (flight);
+
+\node (isoflight) [place, right of=flight, xshift = 1.125cm] {Self-isolation during flight};
+
+\node (arrive) [place, above of=isoflight] {Quarantine on arrival};
+\draw [arrow] (testpre) -- node[anchor=south, align = center, rotate=90]  {Pos.} (dnt);
+%\node (dec1) [decision, below of=pro1] {Decision 1};
+
+
+
+\node (dummy1) [right of=arrive, draw = none, fill = none] {};
+\node (testpost) [test, right of=dummy1] {Test at exit};
+\node (dummy) [below of=testpost, draw = none, fill = none] {};
+\node (community) [place, right of=dummy] {In community (infectious)};
+\node (communityfinal) [startstop, below of=dummy, yshift = 2.25cm] {In community (not infectious)};
+\draw [arrow] (flight) -- (arrive);
+\draw [arrow] (arrive) -- (testpost);
+
+\node (iso) [place, right of=isoflight] {Self-isolation at destination};
+\draw [arrow] (arrive) -- node[anchor=north, rotate=-45] {Develops symptoms} (iso);
+\draw [arrow] (flight) -- node[anchor=south] {Develops symptoms} (isoflight);
+%\draw [arrow] (isoflight) -- node[text width = 5cm, anchor = south, align = center] {Arrive at destination} (iso);
+\draw [arrow] (isoflight) --  (iso);
+\draw [arrow] (testpost) -| node[anchor=north east] {Negative, infectious} (community);
+\draw [arrow] (testpost) -- node[anchor=south, yshift = -1em, xshift = 1em, rotate = 45] {Positive} (iso);
+
+\node (daily) [test, below of=isoflight, bottom color = Blue, top color = {Orange}] {Daily testing (in community)};
+\draw [arrow] (flight) -- (daily);
+\draw [arrow] (daily) -- node[anchor=south, rotate=45, text width = 2.5cm, align = center] {Positive or develops symptoms} (iso);
+
+
+%\draw [arrow] (community) edge[-] node[anchor = south] {Develops symptoms}  (dummy.center);
+ %\draw [arrow] (dummy.center) --  (iso);
+ 
+\draw [arrow] (community) -- node[anchor = north, rotate = 26.6] {Cease inf.}
+ (communityfinal);
+\draw [arrow] (daily) -- node[anchor = south, rotate = 14, text width = 5cm] {Complete all tests, non-infectious}
+ (communityfinal);
+ \draw [arrow] (iso) -- node[anchor = north, rotate = -26.6, text width = 2cm] {Released non-inf.}
+ (communityfinal);
+  \draw [arrow] (daily) -| node[anchor = south east,text width = 5cm]  {Complete all tests, infectious}
+ (community);
+
+ \draw[arrow] (iso) to[out=-13.3, in=193.3] node[anchor = south, text width = 2cm, xshift = -1.5cm, yshift = 0.5em] {Released infectious} (community);
+ \draw[arrow] (community) to[in=13.3, out=-193.3] node[anchor = south, xshift = 2.25cm, yshift = -0.5em] {Develops symptoms} (iso);
+
+  \draw[arrow] (dummy.center) -- (communityfinal);
+ 
+ \draw[arrow] (testpost) edge[-] node[rotate = 90, anchor = south]  {Neg., non-inf.} (dummy.center);
+
+%\begin{pgfonlayer}{background}
+%        \filldraw[draw = none, opacity = 0.2,  fill = black, line width = 5, join=round      ](isoflight.west) -- (arrive.west) |-  (testpost.north) -| (community.east) |- (communityfinal.south) -| cycle;
+%         \filldraw[draw = none, opacity = 0.2,  fill = black!60, line width = 10, join=round      ](isoflight.north) --  (community.north) -| (community.east) |- (daily.south) -|   (isoflight.west) |- cycle;
+%    \end{pgfonlayer}
+    
+    \node[color = black, opacity = 0.5, text width = 2cm, align = center, left of = daily, anchor = west] {Daily testing with LFT};
+    \node[color = black, opacity = 0.5, anchor = west, xshift = 1cm, text width = 2.5cm, align = center, left of = arrive] {Quarantine with either PCR, or LFT, or no test on exit};
+
+
+
+\end{tikzpicture}
+
+\end{document}
