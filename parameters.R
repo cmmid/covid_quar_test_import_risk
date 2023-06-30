@@ -91,63 +91,63 @@ my_dist <- function(x, y, k = 1){
 }
 
 
-if (!file.exists("data/matched_curves.rds")){
-  
-  PCR_curves <- read_csv("data/posterior_samples_ct_threshold_37.csv")
-  
-  #find peak timing
-  curves_peak <- PCR_curves %>%
-    group_by(iter) %>%
-    slice_max(value) %>%
-    select(diff) %>%
-    rename(peak_timing=diff,
-           idx=iter) %>%
-    ungroup()
-  
-  
-  LFA_curves <- read_csv("data/posterior_samples_ct_threshold_28.csv")
-  
-  
-  
-  curves <- list(LFA = LFA_curves,
-                 PCR = PCR_curves) %>%
-    map(~group_by(.x, iter) %>%
-          filter(value == max(value)) %>%
-          ungroup) %>%
-    #map(~head(.x, 100)) %>%
-    map(~mutate(.x,
-                value_s = standardise(value),
-                diff_s  = standardise(diff),
-                value_r = rank(value),
-                diff_r  = rank(diff))) %>%
-    {bind_cols(.[[1]],
-               bind_rows(lapply(X = group_split(rowwise(.[[1]])),
-                                FUN = function(x){
-                                  my_dist(x = x,
-                                          y =.[[2]],
-                                          k = 100)
-                                })
-               ))
-    } %>%
-    rename(iter_lfa = iter)  %>%
-    select(iter_lfa, iter_pcr) %>%
-    tibble::rowid_to_column(.) %>%
-    nest(data = -c(rowid, iter_lfa)) %>%
-    inner_join(LFA_curves, by = c("iter_lfa" = "iter")) %>%
-    unnest(data) %>%
-    select(-X1) %>%
-    rename(LFA = value) %>%
-    left_join(PCR_curves, by = c("iter_pcr" = "iter", "diff")) %>%
-    select(-X1) %>%
-    rename(PCR = value) %>%
-    gather(key, value, LFA, PCR) %>%
-    rename("assay"=key,
-           "idx"=iter_lfa,
-           "days_since_infection"=diff) %>%
-    left_join(curves_peak)
-  
-  saveRDS(curves,"data/matched_curves.rds")
-  
-} else {
-  curves <- read_rds("data/matched_curves.rds")
-}
+# if (!file.exists("data/matched_curves.rds")){
+#   
+#   PCR_curves <- read_csv("data/posterior_samples_ct_threshold_37.csv")
+#   
+#   #find peak timing
+#   curves_peak <- PCR_curves %>%
+#     group_by(iter) %>%
+#     slice_max(value) %>%
+#     select(diff) %>%
+#     rename(peak_timing=diff,
+#            idx=iter) %>%
+#     ungroup()
+#   
+#   
+#   LFA_curves <- read_csv("data/posterior_samples_ct_threshold_28.csv")
+#   
+#   
+#   
+#   curves <- list(LFA = LFA_curves,
+#                  PCR = PCR_curves) %>%
+#     map(~group_by(.x, iter) %>%
+#           filter(value == max(value)) %>%
+#           ungroup) %>%
+#     #map(~head(.x, 100)) %>%
+#     map(~mutate(.x,
+#                 value_s = standardise(value),
+#                 diff_s  = standardise(diff),
+#                 value_r = rank(value),
+#                 diff_r  = rank(diff))) %>%
+#     {bind_cols(.[[1]],
+#                bind_rows(lapply(X = group_split(rowwise(.[[1]])),
+#                                 FUN = function(x){
+#                                   my_dist(x = x,
+#                                           y =.[[2]],
+#                                           k = 100)
+#                                 })
+#                ))
+#     } %>%
+#     rename(iter_lfa = iter)  %>%
+#     select(iter_lfa, iter_pcr) %>%
+#     tibble::rowid_to_column(.) %>%
+#     nest(data = -c(rowid, iter_lfa)) %>%
+#     inner_join(LFA_curves, by = c("iter_lfa" = "iter")) %>%
+#     unnest(data) %>%
+#     select(-X1) %>%
+#     rename(LFA = value) %>%
+#     left_join(PCR_curves, by = c("iter_pcr" = "iter", "diff")) %>%
+#     select(-X1) %>%
+#     rename(PCR = value) %>%
+#     gather(key, value, LFA, PCR) %>%
+#     rename("assay"=key,
+#            "idx"=iter_lfa,
+#            "days_since_infection"=diff) %>%
+#     left_join(curves_peak)
+#   
+#   saveRDS(curves,"data/matched_curves.rds")
+#   
+# } else {
+#   curves <- read_rds("data/matched_curves.rds")
+# }

@@ -40,7 +40,9 @@ pacman::p_load(char = c("tidyverse",
                         "dtplyr",
                         "furrr",
                         "data.table",
-                        "geometry"))
+                        "geometry",
+                        "MESS",
+                        "grDevices"))
 
 conflicted::conflict_prefer("set_names", "purrr")
 conflicted::conflict_prefer("melt", "reshape2")
